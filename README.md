@@ -27,22 +27,6 @@ This dynamic mechanism adapts to price trends and volatility, leading to **signi
 
 ---
 
-## 🧰 Repository Structure  
-
-```
-├── data/                     # Example datasets or data loaders
-├── notebooks/                # Jupyter notebooks for analysis and visualization
-├── src/                      # Core implementation of DGT
-│   ├── grid.py               # Grid construction and reset logic
-│   ├── backtest.py           # Back-testing framework
-│   └── utils.py              # Helper functions
-├── config.yaml               # Parameter configuration
-├── requirements.txt          # Python dependencies
-└── README.md                 # Project documentation (this file)
-```
-
----
-
 ## ⚙️ Setup & Usage  
 
 ### 1. Installation  
@@ -134,13 +118,6 @@ We welcome contributions from developers, quants, and researchers who wish to im
 ### Code of Conduct  
 
 Please follow the [Contributor Covenant](https://www.contributor-covenant.org/) to maintain a respectful and collaborative community.
-
----
-
-## 📜 License  
-
-This project is licensed under the **MIT License**.  
-See the [LICENSE](LICENSE) file for details.
 
 ---
 
