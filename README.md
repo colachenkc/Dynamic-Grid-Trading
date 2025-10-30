@@ -121,6 +121,15 @@ Please follow the [Contributor Covenant](https://www.contributor-covenant.org/) 
 
 ---
 
-**Let’s build and explore the Dynamic Grid Trading Strategy together! 🧩**
+## 🧾 Citation  
 
-*Last updated: October 2025*
+If you use this repository or the ideas from the paper in your research or publication, please cite:  
+
+```bibtex
+@article{chen2025dynamic,
+  title={Dynamic Grid Trading Strategy: From Zero Expectation to Market Outperformance},
+  author={Chen, Kai-Yuan and Chen, Kai-Hsin and Jang, Jyh-Shing Roger},
+  journal={arXiv preprint arXiv:2506.11921},
+  year={2025},
+  url={https://arxiv.org/abs/2506.11921}
+}
