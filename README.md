@@ -36,62 +36,10 @@ git clone <your-repo-url>
 cd <repo-name>
 pip install -r requirements.txt
 ```
-
-### 2. Prepare Data  
-Fetch minute-level cryptocurrency data (e.g. from Binance API) and save it in the `data/` directory.
-
-### 3. Configure Parameters  
-Adjust the grid parameters, transaction fees, and other settings in `config.yaml`:
-
-```yaml
-symbol: BTCUSDT
-grid_size: 0.02
-grid_levels: 6
-transaction_fee: 0.001
-capital: 10000
-```
-
-### 4. Run Backtest  
-
-```bash
-python src/backtest.py --config config.yaml
-```
-
-### 5. Analyze Results  
-Outputs include:
-- **Equity curve**
-- **Internal rate of return (IRR)**
-- **Max drawdown**
-- **Performance comparison** against buy-and-hold & static grid
-
----
-
-## 🧠 Why It Matters  
-
-- Provides a **theoretical correction** to misconceptions about “profitable” grid strategies.  
-- Offers a **simple, robust, and adaptive** approach for volatile assets.  
-- Serves as a **research foundation** for quantitative strategy development and market-adaptive algorithmic systems.  
-
----
-
-## ⚠️ Disclaimer  
-
-> Grid trading carries significant risk.  
-> Back-test results are not indicative of future performance.  
-> Use this codebase for **research and educational purposes only.**
-
----
-
-## 🚀 Possible Extensions  
-
-- Multi-asset portfolio back-testing  
-- Volatility-adaptive grid spacing  
-- Stop-loss / take-profit overlays  
-- Integration with trend filters or ML-based volatility forecasting  
-- Real-time trading via exchange APIs  
-
----
-
+1) Fetch market data with fetch_candlestick.py
+2) Configure path & parameters in DGT.py
+3) Run backtest
+   
 ## 🙌 Welcome to Contributions!  
 
 We welcome contributions from developers, quants, and researchers who wish to improve this project.  
