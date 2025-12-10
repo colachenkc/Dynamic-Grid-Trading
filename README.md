@@ -27,6 +27,25 @@ This dynamic mechanism adapts to price trends and volatility, leading to **signi
 
 ---
 
+## 📂 Project Structure
+```
+project/
+│
+├── src/
+│   ├── config.py           # Global parameters (paths, grid sizes, fee config)
+│   ├── grid_logic.py       # All core functions (grid resets, profit calc, settlement)
+│   ├── backtest.py         # Main backtest runner
+│   └── __init__.py
+│
+├── fetch_candlestick.py
+│   
+├── grid_trading.py
+│   
+└── README.md
+```
+
+---
+
 ## ⚙️ Setup & Usage  
 
 ### 1. Installation  
@@ -36,10 +55,27 @@ git clone <your-repo-url>
 cd <repo-name>
 pip install -r requirements.txt
 ```
+
+### 2. Usage
 1) Fetch market data with fetch_candlestick.py
-2) Configure path & parameters in DGT.py
-3) Run backtest
-   
+2) Configure parameters  
+Edit src/config.py:
+```bash
+symbol = "BTCUSDT_spot"
+start_time = "2021-01-01 00:00:00"
+end_time   = "2024-07-31 23:59:00"
+
+grid_sizes = [0.005, 0.01, 0.015, 0.02]
+grid_numbers_half_list = [2, 3, 5]
+
+grid_principal = 100
+fee_pct = 0.0008
+```
+3) Run the backtest
+From project root:
+```bash
+python -m src.backtest
+```
 ## 🙌 Welcome to Contributions!  
 
 We welcome contributions from developers, quants, and researchers who wish to improve this project.  
