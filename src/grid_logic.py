@@ -1,4 +1,5 @@
 from src.config import grid_principal, fee_pct
+from bisect import bisect_right
 
 def calculate_grid_levels(start_price, grid_size, grid_numbers_half):
     # delta = mid * grid_size
@@ -10,16 +11,13 @@ def calculate_grid_levels(start_price, grid_size, grid_numbers_half):
     return levels
 
 def calculate_profit_up(grid_numbers, grid_numbers_half, grid_size):
-    return (grid_numbers_half * (grid_numbers_half + 1) / 2) * grid_principal / grid_numbers * (grid_size - fee_pct * 2)
+    return (grid_numbers_half * (grid_numbers_half + 1) / 2) * (grid_principal / grid_numbers) * (grid_size - fee_pct * 2)
 
 def calculate_profit_down(grid_numbers, k, grid_size):
-    return (k * (k + 1) / 2) * grid_principal / grid_numbers * (grid_size - fee_pct * 2)
+    return (k * (k + 1) / 2) * (grid_principal / grid_numbers) * (grid_size - fee_pct * 2)
 
-def calculate_profit_arb_up(grid_numbers, grid_numbers_half, grid_size, trade_count):
-    return (trade_count - grid_numbers_half) / 2 * grid_principal / grid_numbers * (grid_size - fee_pct * 2)
-
-def calculate_profit_arb_down(grid_numbers, grid_numbers_half, grid_size, trade_count, count):
-    return (trade_count - grid_numbers_half - count) / 2 * grid_principal / grid_numbers * (grid_size - fee_pct * 2)
+def calculate_profit_arb(grid_numbers, grid_numbers_half, grid_size, trade_count):
+    return ((trade_count - grid_numbers_half) / 2) * (grid_principal / grid_numbers) * (grid_size - fee_pct * 2)
 
 def fund_next_grid(USDT, money_input, grid_principal):
     if USDT >= grid_principal:
@@ -45,7 +43,7 @@ def handle_up_break(
     USDT, grid_count, money_input
 ):
     profit_up  = calculate_profit_up(grid_numbers, grid_numbers_half, grid_size)
-    profit_arb = calculate_profit_arb_up(grid_numbers, grid_numbers_half, grid_size, trade_count)
+    profit_arb = calculate_profit_arb(grid_numbers, grid_numbers_half, grid_size, trade_count)
 
     USDT  += profit_up + profit_arb + grid_principal
 
@@ -60,18 +58,12 @@ def handle_down_break(
     grid_numbers, grid_numbers_half, grid_size,
     grid_principal, trade_count,
     USDT, COIN, grid_count, money_input,
-    max_price, grid_levels, initial_price, fee_pct
+    grid_levels, initial_price, fee_pct
 ):
-    count = 0
-    for i in range(1, grid_numbers_half):
-        if max_price >= grid_levels[grid_numbers_half + i]:
-            count += 1
-        else:
-            break
-    profit_down = calculate_profit_down(grid_numbers, count, grid_size) # 上漲收益
-    profit_arb = calculate_profit_arb_down(grid_numbers, grid_numbers_half, grid_size, trade_count, count) # 套利收益
 
-    USDT += profit_down + profit_arb
+    profit_arb = calculate_profit_arb(grid_numbers, grid_numbers_half, grid_size, trade_count) # 套利收益
+
+    USDT += profit_arb
     COIN += (grid_principal / 2) / initial_price * (1 - fee_pct * 2)
     for i in range(grid_numbers_half):
         COIN += (grid_principal / grid_numbers) / grid_levels[i] * (1 - fee_pct * 2)
@@ -92,7 +84,6 @@ def print_current_status(USDT, COIN, initial_price, money_input):
 def settle_last_grid_segment(
     close_price,
     grid_levels,
-    max_price,
     trade_count,
     grid_numbers_half,
     grid_numbers,
@@ -102,31 +93,37 @@ def settle_last_grid_segment(
     USDT,
     COIN,
 ):
-    # 根據 max_price 計算上漲方向利潤
-    count_up = 0
-    for i in range(1, grid_numbers_half):
-        if max_price >= grid_levels[grid_numbers_half + i]:
-            count_up += 1
-        else:
-            break
-    profit_up = calculate_profit_up(grid_numbers, count_up, grid_size)
+    assert len(grid_levels) == grid_numbers + 1
+    mid_idx = grid_numbers_half
+    mid_price = grid_levels[mid_idx]
 
-    # 計算買入的COIN
-    count_down = 0
-    coin_from_buys = 0.0
-    unused_cash = 0.0
-    for i in range(grid_numbers_half):
-        if grid_levels[i] >= close_price:
-            coin_from_buys += (grid_principal / grid_numbers / grid_levels[i] * (1 - fee_pct * 2))
-            count_down += 1
-        else:
-            unused_cash += grid_principal / grid_numbers
+    per_grid_cash = grid_principal / grid_numbers
+    mid_coin = (grid_principal / 2) / mid_price * (1 - fee_pct)
+    
+    # Find close price pos
+    idx = bisect_right(grid_levels, close_price) - 1
 
-    # 套利收益
-    arb_cycles = (trade_count - count_up - count_down) / 2
-    profit_arb = (arb_cycles * grid_principal / grid_numbers * (grid_size - fee_pct * 2))
+    if close_price >= mid_price:
+        # unused cash
+        remain_count = grid_numbers - idx
+        USDT += remain_count * per_grid_cash 
 
-    USDT += profit_up + profit_arb + unused_cash
-    COIN += coin_from_buys
+        up_count = max(0, idx - mid_idx)
+
+        profit_up = calculate_profit_up(grid_numbers, up_count, grid_size)
+        profit_arb = calculate_profit_arb(grid_numbers, up_count, grid_size, trade_count)
+        USDT += up_count * per_grid_cash + profit_up + profit_arb
+        COIN += mid_coin * (remain_count / grid_numbers_half)
+    else:
+        down_count = max(0, mid_idx - idx)
+        for j in range(mid_idx - 1, idx, -1):
+            COIN += (per_grid_cash / grid_levels[j]) * (1 - fee_pct * 2)
+        profit_arb = calculate_profit_arb(grid_numbers, down_count, grid_size, trade_count)
+        USDT += profit_arb
+        # unused cash
+        unused_grids = (grid_numbers_half - down_count) 
+        USDT += unused_grids * per_grid_cash
+        COIN += mid_coin
 
     return USDT, COIN
+    
