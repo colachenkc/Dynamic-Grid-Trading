@@ -1,0 +1,4 @@
+pandas>=1.5
+numpy>=1.23
+requests>=2.28
+matplotlib>=3.6
