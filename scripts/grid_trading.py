@@ -1,9 +1,12 @@
+import pathlib
 import pandas as pd
 import numpy as np
-import matplotlib.pyplot as plt 
+import matplotlib.pyplot as plt
+
+DATA = pathlib.Path(__file__).resolve().parents[1] / "data"
 
 symbol = 'BTCUSDT_spot'
-df = pd.read_csv(f'{symbol}_1m.csv')
+df = pd.read_csv(DATA / f'{symbol}_1m.csv')
 
 df['Open Time'] = pd.to_datetime(df['Open Time'])
 
@@ -99,7 +102,7 @@ for grid_size in grid_sizes:
     })
 
 results_df = pd.DataFrame(results)
-results_df.to_csv(f'{symbol}_exp1.csv', index=False)
+results_df.to_csv(DATA / f'{symbol}_exp1.csv', index=False)
 plt.plot(Grid_Sizes, Profit, 'red')
 plt.xlabel('Grid Size')
 plt.ylabel('Profit per Grid')

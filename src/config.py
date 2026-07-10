@@ -1,3 +1,9 @@
+from pathlib import Path
+
+# Every CSV/HTML lives here, gitignored. Anchored to the repo root so scripts
+# work from any cwd.
+DATA = Path(__file__).resolve().parents[1] / "data"
+
 symbol = "BTCUSDT_spot"
 start_time = "2021-01-01 00:00:00"
 end_time   = "2024-07-31 23:59:00"

@@ -1,7 +1,10 @@
 import requests
 import pandas as pd
+import pathlib
 import time
 import datetime
+
+DATA = pathlib.Path(__file__).resolve().parents[1] / "data"
 
 def fetch_klines(symbol, interval, start_time, end_time):
     base_url = "https://api.binance.com/api/v3/klines"
@@ -58,9 +61,8 @@ end_date = datetime.datetime(2024, 7, 31)
 data = fetch_data_chronologically(symbol, interval, start_date, end_date)
 
 spot = True
-if spot:
-    data.to_csv(f"{symbol}_spot_{interval}.csv", index=False)
-else:
-    data.to_csv(f"{symbol}_{interval}.csv", index=False)
+DATA.mkdir(exist_ok=True)
+out = DATA / (f"{symbol}_spot_{interval}.csv" if spot else f"{symbol}_{interval}.csv")
+data.to_csv(out, index=False)
 
-print("Data saved.")
+print(f"Data saved to {out}")

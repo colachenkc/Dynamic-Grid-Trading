@@ -32,15 +32,18 @@ This dynamic mechanism adapts to price trends and volatility, leading to **signi
 project/
 │
 ├── src/
-│   ├── config.py           # Global parameters (paths, grid sizes, fee config)
-│   ├── grid_logic.py       # All core functions (grid resets, profit calc, settlement)
-│   ├── backtest.py         # Main backtest runner
-│   └── __init__.py
+│   ├── config.py             # Global parameters (data path, grid sizes, fee config)
+│   ├── grid_logic.py         # Core functions (grid resets, profit calc, settlement)
+│   └── dgt_backtest.py       # Main backtest runner
 │
-├── fetch_candlestick.py
-│   
-├── grid_trading.py
-│   
+├── scripts/
+│   ├── fetch_candlestick.py  # Download OHLCV from Binance into data/
+│   ├── grid_trading.py       # Static-grid baseline (paper experiment 1)
+│   ├── viz.py                # Heatmap of the parameter sweep
+│   └── orders.py             # Order chart + performance metrics for one config
+│
+├── data/                     # All CSV/HTML, gitignored — created on first fetch
+│
 └── README.md
 ```
 
@@ -57,7 +60,10 @@ pip install -r requirements.txt
 ```
 
 ### 2. Usage
-1) Fetch market data with fetch_candlestick.py
+1) Fetch market data. Writes `data/BTCUSDT_spot_1m.csv` (~300 MB, takes a while):
+```bash
+python scripts/fetch_candlestick.py
+```
 2) Configure parameters  
 Edit src/config.py:
 ```bash
@@ -71,11 +77,26 @@ grid_numbers_half_list = [2, 3, 5]
 grid_principal = 100
 fee_pct = 0.0008
 ```
-3) Run the backtest
-From project root:
+3) Run the parameter sweep. From project root:
 ```bash
-python -m src.backtest
+python -m src.dgt_backtest
 ```
+
+### 3. Analysis
+
+Heatmap the sweep by any metric (default `IRR`, or an expression over the columns):
+```bash
+python scripts/viz.py data/BTCUSDT_spot_grid_strategy_backtest_results.csv IRR
+```
+
+For a single config, set `trade_log = (grid_size, grid_numbers_half)` in `src/config.py`
+and re-run the backtest — it dumps `<tag>_fills.csv` and `<tag>_equity.csv` into `data/`.
+Chart them, with performance versus buy & hold:
+```bash
+python scripts/orders.py data/<tag>_fills.csv data/<tag>_equity.csv
+```
+
+All output lands next to its input, in `data/`.
 ## 🙌 Welcome to Contributions!  
 
 We welcome contributions from developers, quants, and researchers who wish to improve this project.  

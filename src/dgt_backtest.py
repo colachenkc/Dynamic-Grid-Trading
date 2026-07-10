@@ -2,7 +2,7 @@ import pandas as pd
 import numpy as np
 
 from src.config import (
-    symbol, start_time, end_time,
+    DATA, symbol, start_time, end_time,
     grid_sizes, grid_numbers_half_list,
     grid_principal, fee_pct, trade_log, sell_on_up_break,
 )
@@ -11,7 +11,7 @@ from src.grid_logic import (
     settle_last_grid_segment, print_current_status,
 )
 
-df = pd.read_csv(f"{symbol}_1m.csv")
+df = pd.read_csv(DATA / f"{symbol}_1m.csv")
 df["Open Time"] = pd.to_datetime(df["Open Time"])
 df = df[(df["Open Time"] >= start_time) & (df["Open Time"] <= end_time)]
 
@@ -141,11 +141,11 @@ for grid_size in grid_sizes:
 
         if trade_log:
             tag = f"{symbol}_{grid_size}_{grid_numbers_half}"
-            pd.DataFrame(fills, columns=['time', 'price', 'side']).to_csv(f"{tag}_fills.csv", index=False)
-            pd.DataFrame(equity, columns=['time', 'value', 'money_input', 'close', 'usdt', 'coin']).to_csv(f"{tag}_equity.csv", index=False)
+            pd.DataFrame(fills, columns=['time', 'price', 'side']).to_csv(DATA / f"{tag}_fills.csv", index=False)
+            pd.DataFrame(equity, columns=['time', 'value', 'money_input', 'close', 'usdt', 'coin']).to_csv(DATA / f"{tag}_equity.csv", index=False)
             print(f"Wrote {tag}_fills.csv ({len(fills)} fills) and {tag}_equity.csv")
 
 if not trade_log:
-    results_df = pd.DataFrame(results)
-    results_df.to_csv(f'{symbol}_grid_strategy_backtest_results.csv', index=False)
-    print(f"Results saved to {symbol}_grid_strategy_backtest_results.csv")
+    out = DATA / f"{symbol}_grid_strategy_backtest_results.csv"
+    pd.DataFrame(results).to_csv(out, index=False)
+    print(f"Results saved to {out}")
